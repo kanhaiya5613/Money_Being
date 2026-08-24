@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "b3e9a184-moneybeing-assessment-2026",
+		"name": "MoneyBeing Loan Eligibility & BRE API",
+		"description": "Postman Collection for MoneyBeing Loan Lead & BRE Management API System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Get Admin Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Leads",
+			"item": [
+				{
+					"name": "Submit Loan Application (Public)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"Rohan Mehta\",\n  \"mobile\": \"9876543210\",\n  \"email\": \"rohan.mehta@example.com\",\n  \"dob\": \"1992-06-15\",\n  \"city\": \"Mumbai\",\n  \"pincode\": \"400001\",\n  \"loan_type\": \"Home Loan\",\n  \"employment_type\": \"Salaried\",\n  \"monthly_income\": 80000,\n  \"loan_amount\": 4000000,\n  \"property_value\": 6000000,\n  \"consent\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/leads",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "leads"]
+						}
+					}
+				},
+				{
+					"name": "Get All Leads (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leads?page=1&limit=10&search=&loan_type=&bre_status=",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "leads"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" },
+								{ "key": "search", "value": "" },
+								{ "key": "loan_type", "value": "" },
+								{ "key": "bre_status", "value": "" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Dashboard Stats (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leads/stats",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "leads", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Export Leads Excel (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/leads/export/excel",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "leads", "export", "excel"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "BRE Rules",
+			"item": [
+				{
+					"name": "Get BRE Rules (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/rules",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rules"]
+						}
+					}
+				},
+				{
+					"name": "Create BRE Rule (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rule_name\": \"Minimum Monthly Income\",\n  \"field_name\": \"monthly_income\",\n  \"operator\": \">=\",\n  \"value\": \"30000\",\n  \"error_message\": \"Monthly income must be at least ₹30,000\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/rules",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "rules"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "admin_token",
+			"value": ""
+		}
+	]
+}

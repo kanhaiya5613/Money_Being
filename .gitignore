@@ -1,0 +1,38 @@
+# Environment Variable Files (Never commit private keys or secrets to GitHub)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Python Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.db
+*.sqlite3
+venv/
+ENV/
+env/
+
+# Next.js & Node Artifacts
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# IDE & Operating System Files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
