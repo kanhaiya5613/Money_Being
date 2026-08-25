@@ -38,6 +38,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [recentLeads, setRecentLeads] = useState<RecentLead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -103,8 +104,6 @@ export default function AdminDashboardPage() {
   })) : [];
 
   const BAR_COLORS = ["#6366f1", "#06b6d4", "#10b981", "#f59e0b"];
-
-  const [exporting, setExporting] = useState(false);
 
   const handleExportExcel = async () => {
     setExporting(true);
