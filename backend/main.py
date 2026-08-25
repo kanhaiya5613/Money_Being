@@ -93,7 +93,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     origin = request.headers.get("origin", "*")
     return JSONResponse(
         status_code=exc.status_code,
-        content={"status": "error", "message": exc.detail},
+        content={"detail": exc.detail, "status": "error", "message": exc.detail},
         headers={
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Credentials": "true",
