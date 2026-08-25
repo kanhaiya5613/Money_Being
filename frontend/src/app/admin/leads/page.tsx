@@ -74,7 +74,32 @@ export default function LeadsPage() {
     fetchLeads();
   }, [page, search, loanTypeFilter, breStatusFilter, router]);
 
-  const exportExcelUrl = `${API_BASE_URL}/api/leads/export/excel`;
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const res = await apiFetch("/api/leads/export/excel");
+      if (!res.ok) {
+        alert("Failed to export Excel report.");
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Loan_Leads_Report.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Export failed", err);
+      alert("Error downloading Excel file.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -90,14 +115,21 @@ export default function LeadsPage() {
 
         <div className="flex items-center gap-3">
           {/* Excel Export Button */}
-          <a
-            href={exportExcelUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all transform hover:scale-[1.02]"
+          <button
+            onClick={handleExportExcel}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all transform hover:scale-[1.02] disabled:opacity-50"
           >
-            <FileSpreadsheet className="w-4 h-4" /> Export Excel (.xlsx)
-          </a>
+            {exporting ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" /> Exporting...
+              </>
+            ) : (
+              <>
+                <FileSpreadsheet className="w-4 h-4" /> Export Excel (.xlsx)
+              </>
+            )}
+          </button>
 
           <button
             onClick={fetchLeads}

@@ -168,8 +168,9 @@ def get_dashboard_stats(
 
 @router.get("/export/excel")
 def export_leads_excel(
+    token: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user)
 ):
     leads = db.query(Lead).order_by(Lead.created_at.desc()).all()
     
@@ -208,11 +209,11 @@ def export_leads_excel(
     wb.save(stream)
     stream.seek(0)
 
-    headers = {
+    response_headers = {
         'Content-Disposition': 'attachment; filename="Loan_Leads_Report.xlsx"'
     }
     return StreamingResponse(
         stream,
-        headers=headers,
+        headers=response_headers,
         media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )

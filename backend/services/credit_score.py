@@ -10,12 +10,12 @@ CREDIT_API_URL = os.getenv("CREDIT_API_URL", "https://loan-api.free.beeceptor.co
 async def fetch_credit_score(mobile: str, monthly_income: float, employment_type: str) -> int:
     """
     Fetches customer credit score from Credit Bureau API with graceful failover.
-    If external API returns valid score, returns it. If unavailable/non-JSON/timed out,
-    gracefully executes internal simulation algorithm.
+    If external API returns valid JSON score, returns it. If unavailable or invalid,
+    gracefully executes internal simulation algorithm with balanced CIBIL distribution (550-850).
     """
     if CREDIT_API_URL:
         try:
-            async with httpx.AsyncClient(timeout=2.0) as client:
+            async with httpx.AsyncClient(timeout=1.0) as client:
                 response = await client.post(
                     CREDIT_API_URL,
                     json={"mobile": mobile, "monthly_income": monthly_income}
@@ -23,7 +23,6 @@ async def fetch_credit_score(mobile: str, monthly_income: float, employment_type
                 if response.status_code == 200:
                     try:
                         data = response.json()
-                        # Support multiple common JSON keys: credit_score, score, cibil_score
                         val = data.get("credit_score") or data.get("score") or data.get("cibil_score")
                         if val is not None and isinstance(val, (int, float)):
                             score_int = int(val)
@@ -35,26 +34,31 @@ async def fetch_credit_score(mobile: str, monthly_income: float, employment_type
             logger.warning(f"Credit Bureau API ({CREDIT_API_URL}) request failed ({str(e)}). Executing failover simulation engine.")
 
     # Graceful Fallback / Simulation Algorithm:
-    # Generates realistic score (300-900 CIBIL range) based on mobile number seed and income/employment
+    # Generates a balanced CIBIL score distribution (550 - 850 range)
     try:
-        mobile_seed = int(mobile[-4:])
+        digits = [int(d) for d in str(mobile) if d.isdigit()]
+        mobile_sum = sum(digits)
+        last_4 = int(str(mobile)[-4:]) if len(str(mobile)) >= 4 else 5000
     except Exception:
-        mobile_seed = 5000
+        mobile_sum = 45
+        last_4 = 5000
 
-    # Hash-based base score variation between 560 and 780
-    hash_base = 560 + ((mobile_seed * 37) % 220)
-    
-    # Income adjustment (-30 to +50)
-    if monthly_income < 30000:
-        income_adj = -30
+    # Base score centered around 630 (range 530 - 750)
+    hash_base = 530 + ((last_4 * 17 + mobile_sum * 13) % 220)
+
+    # Income adjustment (-40 to +60)
+    if monthly_income < 25000:
+        income_adj = -40
+    elif monthly_income < 35000:
+        income_adj = -10
     elif monthly_income < 60000:
-        income_adj = 10
+        income_adj = 15
     elif monthly_income < 100000:
-        income_adj = 30
+        income_adj = 35
     else:
-        income_adj = 50
+        income_adj = 60
 
-    emp_adj = 20 if employment_type == "Salaried" else 0
+    emp_adj = 15 if employment_type == "Salaried" else 0
 
     calculated_score = hash_base + income_adj + emp_adj
     # Clamp score between 550 and 850 (standard CIBIL range)
