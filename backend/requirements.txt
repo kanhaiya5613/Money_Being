@@ -9,8 +9,6 @@ passlib[bcrypt]>=1.7.4
 bcrypt==4.0.1
 python-multipart>=0.0.6
 openpyxl>=3.1.2
-sqlalchemy.orm
 pytest>=7.4.4
 httpx>=0.26.0
-dotenv
-sqlalchemy
+python-dotenv>=1.0.0
