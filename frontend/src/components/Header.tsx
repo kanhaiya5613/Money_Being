@@ -28,12 +28,16 @@ export default function Header() {
     setRole(storedRole);
 
     // Health check FastAPI backend
-    fetch(`${API_BASE_URL}/`)
-      .then((res) => {
-        if (res.ok) setIsBackendHealthy(true);
-        else setIsBackendHealthy(false);
-      })
-      .catch(() => setIsBackendHealthy(false));
+    if (typeof window !== "undefined" && window.location.hostname !== "localhost" && API_BASE_URL === "http://localhost:8000") {
+      setIsBackendHealthy(false);
+    } else {
+      fetch(`${API_BASE_URL}/`)
+        .then((res) => {
+          if (res.ok) setIsBackendHealthy(true);
+          else setIsBackendHealthy(false);
+        })
+        .catch(() => setIsBackendHealthy(false));
+    }
   }, [pathname]);
 
   const handleLogout = () => {

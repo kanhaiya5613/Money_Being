@@ -7,6 +7,8 @@ import {
   ArrowRight, ShieldCheck, RefreshCw, Calculator, Sparkles
 } from "lucide-react";
 
+import { API_BASE_URL } from "@/lib/api";
+
 interface BREOutput {
   status: string;
   lead_id?: number;
@@ -58,7 +60,7 @@ export default function ApplyPage() {
     setResult(null);
 
     try {
-      const response = await fetch("http://localhost:8000/api/leads", {
+      const response = await fetch(`${API_BASE_URL}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -78,7 +80,7 @@ export default function ApplyPage() {
         setResult(data);
       }
     } catch (err: any) {
-      setErrorMessage("Network error: Unable to reach API server at http://localhost:8000");
+      setErrorMessage(`Network error: Unable to reach API server at ${API_BASE_URL}`);
     } finally {
       setLoading(false);
     }
