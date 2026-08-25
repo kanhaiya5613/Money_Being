@@ -35,22 +35,29 @@ async def fetch_credit_score(mobile: str, monthly_income: float, employment_type
             logger.warning(f"Credit Bureau API ({CREDIT_API_URL}) request failed ({str(e)}). Executing failover simulation engine.")
 
     # Graceful Fallback / Simulation Algorithm:
-    # Generates realistic score based on income and mobile number seed for reproducible testing
+    # Generates realistic score (300-900 CIBIL range) based on mobile number seed and income/employment
     try:
-        last_digits = int(mobile[-4:])
+        mobile_seed = int(mobile[-4:])
     except Exception:
-        last_digits = 5000
+        mobile_seed = 5000
 
-    base_score = 650
-    # Higher income boosts score (up to 120 points)
-    income_bonus = min(120, int(monthly_income / 1500))
-    # Employment type bonus
-    emp_bonus = 30 if employment_type == "Salaried" else 20
-    # Digit hash variation (0-50)
-    var = (last_digits % 50)
+    # Hash-based base score variation between 560 and 780
+    hash_base = 560 + ((mobile_seed * 37) % 220)
+    
+    # Income adjustment (-30 to +50)
+    if monthly_income < 30000:
+        income_adj = -30
+    elif monthly_income < 60000:
+        income_adj = 10
+    elif monthly_income < 100000:
+        income_adj = 30
+    else:
+        income_adj = 50
 
-    calculated_score = base_score + income_bonus + emp_bonus + var
-    # Clamp score between 580 and 840 (standard CIBIL range: 300 - 900)
-    score = max(580, min(840, calculated_score))
+    emp_adj = 20 if employment_type == "Salaried" else 0
+
+    calculated_score = hash_base + income_adj + emp_adj
+    # Clamp score between 550 and 850 (standard CIBIL range)
+    score = max(550, min(850, calculated_score))
     
     return score

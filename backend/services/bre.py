@@ -49,17 +49,20 @@ def evaluate_lead(lead_data: Dict[str, Any], credit_score: int, db: Session) -> 
         reason = rule.error_message
 
         try:
+            # Clean numeric string representation if needed
+            clean_value = str(rule.value).replace("%", "").replace(",", "").strip() if rule.value is not None else "0"
+
             if op == ">=":
-                if float(field_val) < float(rule.value):
+                if float(field_val) < float(clean_value):
                     failed = True
             elif op == "<=":
-                if float(field_val) > float(rule.value):
+                if float(field_val) > float(clean_value):
                     failed = True
             elif op == ">":
-                if float(field_val) <= float(rule.value):
+                if float(field_val) <= float(clean_value):
                     failed = True
             elif op == "<":
-                if float(field_val) >= float(rule.value):
+                if float(field_val) >= float(clean_value):
                     failed = True
             elif op == "==":
                 if str(field_val).lower() != str(rule.value).lower():
@@ -71,12 +74,13 @@ def evaluate_lead(lead_data: Dict[str, Any], credit_score: int, db: Session) -> 
                 # e.g., loan_amount <= 80% of property_value
                 target_field_name = rule.target_field or "property_value"
                 base_val = context.get(target_field_name, 0)
-                allowed_max = (float(rule.value) / 100.0) * float(base_val)
+                allowed_max = (float(clean_value) / 100.0) * float(base_val)
                 if float(field_val) > allowed_max:
                     failed = True
                     reason = f"{rule.error_message} (Requested: ₹{field_val:,.0f}, Max Allowed: ₹{allowed_max:,.0f})"
-        except Exception:
-            # If data conversion or evaluation fails, mark as soft pass or log
+        except Exception as e:
+            # Log error if evaluation fails for a rule
+            print(f"Error evaluating BRE rule '{rule.rule_name}': {e}")
             pass
 
         if failed:

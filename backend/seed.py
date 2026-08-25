@@ -31,53 +31,57 @@ def seed_db(db_session=None):
             db.commit()
 
         # 2. Seed Default BRE Rules (as specified in Assessment doc)
-        existing_rules_count = db.query(BRERule).count()
-        if existing_rules_count == 0:
-            default_rules = [
-                BRERule(
-                    rule_name="Minimum Applicant Age",
-                    field_name="age",
-                    operator=">=",
-                    value="21",
-                    error_message="Applicant age must be at least 21 years",
-                    is_active=True
-                ),
-                BRERule(
-                    rule_name="Maximum Applicant Age",
-                    field_name="age",
-                    operator="<=",
-                    value="60",
-                    error_message="Applicant age must not exceed 60 years",
-                    is_active=True
-                ),
-                BRERule(
-                    rule_name="Minimum Monthly Income",
-                    field_name="monthly_income",
-                    operator=">=",
-                    value="30000",
-                    error_message="Monthly Income below minimum eligibility criteria (₹30,000)",
-                    is_active=True
-                ),
-                BRERule(
-                    rule_name="Minimum Credit Score",
-                    field_name="credit_score",
-                    operator=">=",
-                    value="700",
-                    error_message="Credit Score below minimum requirement (700)",
-                    is_active=True
-                ),
-                BRERule(
-                    rule_name="Maximum Loan to Value (LTV)",
-                    field_name="loan_amount",
-                    operator="<=_pct_of",
-                    target_field="property_value",
-                    value="80",
-                    error_message="Loan Amount exceeds eligible limit (80% of Property Value)",
-                    is_active=True
-                ),
-            ]
-            db.add_all(default_rules)
-            db.commit()
+        default_rules = [
+            {
+                "rule_name": "Minimum Applicant Age",
+                "field_name": "age",
+                "operator": ">=",
+                "value": "21",
+                "error_message": "Applicant age must be at least 21 years",
+                "is_active": True
+            },
+            {
+                "rule_name": "Maximum Applicant Age",
+                "field_name": "age",
+                "operator": "<=",
+                "value": "60",
+                "error_message": "Applicant age must not exceed 60 years",
+                "is_active": True
+            },
+            {
+                "rule_name": "Minimum Monthly Income",
+                "field_name": "monthly_income",
+                "operator": ">=",
+                "value": "30000",
+                "error_message": "Monthly Income below minimum eligibility criteria (₹30,000)",
+                "is_active": True
+            },
+            {
+                "rule_name": "Minimum Credit Score",
+                "field_name": "credit_score",
+                "operator": ">=",
+                "value": "700",
+                "error_message": "Credit Score below minimum requirement (700)",
+                "is_active": True
+            },
+            {
+                "rule_name": "Maximum Loan to Value (LTV)",
+                "field_name": "loan_amount",
+                "operator": "<=_pct_of",
+                "target_field": "property_value",
+                "value": "80",
+                "error_message": "Loan Amount exceeds eligible limit (80% of Property Value)",
+                "is_active": True
+            },
+        ]
+
+        for rule_data in default_rules:
+            existing = db.query(BRERule).filter(
+                BRERule.rule_name == rule_data["rule_name"]
+            ).first()
+            if not existing:
+                db.add(BRERule(**rule_data))
+        db.commit()
 
         # 3. Seed Sample Leads safely
         sample_leads_data = [
